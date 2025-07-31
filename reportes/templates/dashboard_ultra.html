@@ -1,0 +1,951 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sistema de Reportes Biométrico - {{ app_name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Botón para móvil -->
+<button class="toggle-sidebar d-md-none" onclick="toggleSidebar()">
+    <i class="bi bi-list"></i>
+</button>
+
+<!-- Barra lateral -->
+<div class="sidebar">
+    <div class="sidebar-header">
+        <img src="{% static 'img/logo1.jpg' %}" alt="Logo" class="sidebar-logo">
+    </div>
+    <nav class="sidebar-nav">
+        <a href="{% url 'reportes:bienvenida' %}" class="sidebar-item" title="Bienvenida al sistema">
+            <i class="bi bi-house"></i> Inicio
+        </a>
+        <a href="{% url 'reportes:registros_hoy' %}" class="sidebar-item" title="Registros de hoy">
+            <i class="bi bi-person-badge"></i> Registros
+        </a>
+        <a href="{% url 'reportes:reportes_section' %}" class="sidebar-item" title="Generación de reportes">
+            <i class="bi bi-file-earmark-text"></i> Reportes
+        </a>
+        {% if rol == 'admin' or request.user.is_superuser %}
+        <a href="{% url 'reportes:configuracion_section' %}" class="sidebar-item" title="Ajustes del sistema">
+            <i class="bi bi-gear"></i> Configuración
+        </a>
+        <a href="{% url 'reportes:dashboard_admin' %}" class="sidebar-item" title="Administración de usuarios">
+            <i class="bi bi-person-gear"></i> Administración
+            <small class="d-block text-warning ps-4 mt-1" style="font-size: 0.75rem;">Solo administradores</small>
+        </a>
+        {% endif %}
+        <a href="{% url 'reportes:ayuda' %}" class="sidebar-item" title="Centro de ayuda">
+            <i class="bi bi-question-circle"></i> Ayuda
+            <small class="d-block text-muted ps-4 mt-1" style="font-size: 0.75rem;">Guías y soporte</small>
+        </a>
+        <form id="logout-form" action="{% url 'reportes:logout' %}" method="post" style="display: none;">
+            {% csrf_token %}
+        </form>
+        <a href="#" onclick="document.getElementById('logout-form').submit(); return false;" class="sidebar-item" title="Cerrar sesión">
+            <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+            <small class="d-block text-muted ps-4 mt-1" style="font-size: 0.75rem;">Finalizar la sesión actual</small>
+        </a>
+    </nav>
+</div>
+            <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+            <small class="d-block text-muted ps-4 mt-1" style="font-size: 0.75rem;">Finalizar la sesión actual</small>
+        </a>
+    </nav>
+</div>
+
+<!-- Contenido principal -->
+<div class="main-content">
+    <div class="dashboard-ultra">
+    <!-- Header con información del usuario -->
+    <div class="container-fluid py-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="stats-card-ultra">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h1 class="display-6 mb-3 text-gradient">
+                                <i class="bi bi-clipboard-data me-2"></i>
+                                Dashboard de Asistencia
+                            </h1>
+                            <p class="mb-0 text-muted fs-5">
+                                Bienvenido <strong class="text-primary">{{ usuario }}</strong> 
+                                <span class="badge bg-primary ms-2">{{ rol|title }}</span>
+                            </p>
+                            <small class="text-muted">{{ departamento }} | Versión {{ version }}</small>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <div class="d-flex justify-content-md-end align-items-center">
+                                <div class="me-3">
+                                    <small class="text-muted d-block">Fecha</small>
+                                    <strong>{{ fecha_actual }}</strong>
+                                </div>
+                                <div>
+                                    <small class="text-muted d-block">Hora</small>
+                                    <strong id="reloj-ultra">{{ hora_actual }}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mensaje de bienvenida explicativo -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="stats-card-ultra">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h2 class="text-gradient mb-3">Bienvenido al Sistema de Control de Asistencia</h2>
+                            <p class="lead text-muted">Este sistema te permite:</p>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check-circle-fill text-success me-2"></i>Monitorear en tiempo real la asistencia del personal</li>
+                                <li><i class="bi bi-check-circle-fill text-success me-2"></i>Generar reportes detallados en PDF y Excel</li>
+                                <li><i class="bi bi-check-circle-fill text-success me-2"></i>Visualizar estadísticas y tendencias de asistencia</li>
+                                <li><i class="bi bi-check-circle-fill text-success me-2"></i>Gestionar registros biométricos del personal</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <i class="bi bi-fingerprint display-1 text-primary opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Encabezado y estadísticas -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="text-center">
+                    <h1 class="text-gradient">REPORTES DE ASISTENCIA</h1>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tarjetas de estadísticas -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="stats-card-ultra">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="bi bi-people stats-icon-ultra text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h3>250</h3>
+                            <p class="mb-0 text-muted">Total Personal</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="stats-card-ultra">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="bi bi-clock-history stats-icon-ultra text-danger"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h3 id="totalAtrasados">0</h3>
+                            <p class="mb-0 text-muted">Atrasados Hoy</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="stats-card-ultra">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="bi bi-person-x stats-icon-ultra text-warning"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h3 id="totalFaltas">0</h3>
+                            <p class="mb-0 text-muted">No han Marcado</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de filtros ultra -->
+        <div class="filter-card-ultra p-4 mb-4">
+            <h5 class="mb-3">
+                <i class="bi bi-funnel-fill"></i> Panel de Control de Reportes
+            </h5>
+            
+            <form id="filtrosUltraForm" method="get" action="{% url 'reportes:reportes_section' %}">
+                <div class="row">
+                    <div class="col-lg-2 col-md-4 mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-calendar-event"></i> Desde
+                        </label>
+                        <input type="date" class="form-control form-control-ultra" id="fechaInicio" name="fecha_inicio" value="{{ fecha_inicio }}">
+                    </div>
+                    <div class="col-lg-2 col-md-4 mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-calendar-event"></i> Hasta
+                        </label>
+                        <input type="date" class="form-control form-control-ultra" id="fechaFin" name="fecha_fin" value="{{ fecha_fin }}">
+                    </div>
+                    <div class="col-lg-2 col-md-4 mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-person-badge"></i> ID Usuario
+                        </label>
+                        <input type="text" class="form-control form-control-ultra" id="idUsuario" name="id_usuario" placeholder="ID Usuario" value="{{ id_usuario }}">
+                    </div>
+                    <div class="col-lg-2 col-md-4 mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-person"></i> Nombre
+                        </label>
+                        <input type="text" class="form-control form-control-ultra" id="nombreUsuario" name="nombre" placeholder="Nombre" value="{{ nombre }}">
+                    </div>
+                    <div class="col-lg-3 col-md-4 mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-building"></i> Departamento
+                        </label>
+                        <select class="form-select select-ultra" id="departamento" name="departamento">
+                            <option value="">Todos</option>
+                            {% for dept in departamentos %}
+                                <option value="{{ dept }}" {% if departamento == dept %}selected{% endif %}>{{ dept }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12 d-flex flex-wrap gap-2 justify-content-center">
+                        <button id="btnBuscarReportes" type="button" class="btn btn-primary btn-ultra">
+                            <i class="bi bi-search"></i> Buscar Reportes
+                        </button>
+                        <button id="btnDescargarPDF" type="button" class="btn btn-danger btn-ultra">
+                            <i class="bi bi-file-pdf"></i> Descargar PDF
+                        </button>
+                        <button id="btnDescargarExcelSimple" type="button" class="btn btn-success btn-ultra">
+                            <i class="bi bi-file-excel"></i> Excel Simple
+                        </button>
+                        <button id="btnDescargarExcelCompleto" type="button" class="btn btn-info btn-ultra">
+                            <i class="bi bi-file-excel-fill"></i> Excel Completo
+                        </button>
+                        <button id="btnLimpiarFiltros" type="button" class="btn btn-outline-light btn-ultra">
+                            <i class="bi bi-arrow-clockwise"></i> Limpiar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- FIN DEL CONTAINER-FLUID -->
+    
+    <!-- Sección independiente para la tabla - FUERA del container-fluid -->
+    <div class="table-section-independent">
+        <!-- Barra de búsqueda en tiempo real -->
+        <div class="search-controls">
+            <div class="search-wrapper">
+                <div class="input-group search-box">
+                    <span class="input-group-text">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" class="form-control" id="filtroRapido" placeholder="Buscar por ID o Nombre..." oninput="filtrarResultados(this.value)">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tabla de resultados ultra -->
+        <div class="table-container" id="resultadosUltra">
+            <div class="table-header-panel">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-table me-2"></i>
+                    <h5 class="mb-0">Resultados de Reportes</h5>
+                </div>
+                <span class="badge bg-white text-primary px-3 py-2" id="totalRegistros">0 registros</span>
+            </div>
+            
+            <div class="table-scroll-container table-reportes-container">
+                <table class="table table-ultra">
+                    <thead>                    <tr>
+                        <th class="column-id"><i class="bi bi-person-badge"></i> ID</th>
+                        <th class="column-nombre"><i class="bi bi-person"></i> NOMBRE</th>
+                        <th class="column-departamento"><i class="bi bi-building"></i> DEPARTAMENTO</th>
+                        <th class="column-fecha"><i class="bi bi-calendar3"></i> FECHA</th>
+                        <th class="column-marcacion"><i class="bi bi-clock"></i> PRIMERA MARCACIÓN</th>
+                        <th class="column-marcacion"><i class="bi bi-clock"></i> SEGUNDA MARCACIÓN</th>
+                        <th class="column-marcacion"><i class="bi bi-clock"></i> TERCERA MARCACIÓN</th>
+                        <th class="column-marcacion"><i class="bi bi-clock"></i> CUARTA MARCACIÓN</th>
+                        <th class="column-observacion"><i class="bi bi-flag-fill"></i> OBSERVACIONES/ESTADO</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaReportes">
+                        {% if reportes %}
+                            {% for reporte in reportes %}
+                            <tr{% if reporte.observacion == 'Atraso' %} class="table-danger"{% endif %}>
+                                <td>{{ reporte.id_usuario }}</td>
+                                <td>{{ reporte.nombre }}</td>
+                                <td>{{ reporte.departamento }}</td>
+                                <td>{{ reporte.fecha }}</td>
+                                <td>{{ reporte.hora_ingreso }}</td>
+                                <td>{{ reporte.hora_inicio_descanso }}</td>
+                                <td>{{ reporte.hora_fin_descanso }}</td>
+                                <td>{{ reporte.hora_salida }}</td>
+                                <td>{{ reporte.observacion }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="9" class="text-center">No hay reportes para mostrar.</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="9" class="text-center py-5">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <i class="bi bi-search display-4 text-muted mb-3"></i>
+                                        <h5 class="text-muted">Busca reportes usando los filtros</h5>
+                                        <p class="text-muted">Usa el panel de filtros para encontrar registros específicos</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- FIN DE LA SECCIÓN INDEPENDIENTE DE LA TABLA -->
+
+    <!-- INICIO DEL CONTAINER-FLUID PARA EL RESTO -->
+    <div class="container-fluid py-4">
+
+        <!-- Estado del sistema -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="stats-card-ultra">
+                    <h6 class="mb-3">
+                        <i class="bi bi-activity"></i> Estado del Sistema
+                    </h6>
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <span class="status-indicator status-online"></span>
+                            <div><small>Base de Datos</small></div>
+                            <div><strong>Online</strong></div>
+                        </div>
+                        <div class="col-4">
+                            <span class="status-indicator status-online"></span>
+                            <div><small>Cache</small></div>
+                            <div><strong>Activo</strong></div>
+                        </div>
+                        <div class="col-4">
+                            <span class="status-indicator status-warning"></span>
+                            <div><small>API</small></div>
+                            <div><strong>Limitado</strong></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="stats-card-ultra">
+                    <h6 class="mb-3">
+                        <i class="bi bi-info-circle"></i> Características del Sistema
+                    </h6>
+                    <div class="row">
+                        <div class="col-6">
+                            <ul class="list-unstyled mb-0">
+                                <li><i class="bi bi-check-circle text-success"></i> Cache Inteligente</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Rate Limiting</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Logging Avanzado</li>
+                            </ul>
+                        </div>
+                        <div class="col-6">
+                            <ul class="list-unstyled mb-0">
+                                <li><i class="bi bi-check-circle text-success"></i> PDF Múltiples</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Paginación</li>
+                                <li><i class="bi bi-check-circle text-success"></i> Middleware Custom</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+<!-- Loading overlay -->
+<div class="loading-ultra" id="loadingUltra">
+    <div class="spinner-ultra"></div>
+</div>
+
+<!-- Widget flotante -->
+<div class="floating-widget" onclick="mostrarAyudaUltra()">
+    <i class="bi bi-question-circle"></i> Ayuda
+</div>
+</div>
+</div>
+{% endblock content %}
+
+ {% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf-autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="{% static 'js/scripts.js' %}"></script>
+
+<script>
+function getBaseUrl() {
+    return window.location.protocol + "//" + window.location.host;
+}
+
+function getDownloadUrl(format) {
+    const baseUrl = getBaseUrl();
+    if (format === 'excel') {
+        return `${baseUrl}{% url 'reportes:download_excel_simple' %}`;
+    }
+    if (format === 'pdf') {
+        return `${baseUrl}{% url 'reportes:download_pdf' %}`;
+    }
+    return '';
+}
+
+function descargarReporte(formato) {
+    const searchInput = document.getElementById('filtro-nombre');
+    const deptoSelect = document.getElementById('filtro-departamento');
+    const fechaInput = document.getElementById('filtro-fecha');
+
+    let filename = "Reporte General"; // Nombre por defecto
+    const searchTerm = searchInput.value.trim();
+    const deptoId = deptoSelect.value;
+    const fecha = fechaInput.value;
+
+    if (searchTerm) {
+        filename = `Reporte de ${searchTerm}`;
+    } else if (deptoId) {
+        const deptoNombre = deptoSelect.options[deptoSelect.selectedIndex].text;
+        filename = `Reporte de ${deptoNombre}`;
+    }
+    
+    // Construir la URL con los parámetros de filtro actuales
+    const params = new URLSearchParams(window.location.search);
+    params.set('filename', filename); // Añadir el nombre de archivo dinámico
+
+    const downloadUrl = formato === 'pdf' ? "{% url 'reportes:download_pdf' %}" : "{% url 'reportes:download_excel_simple' %}";
+    
+    window.location.href = `${downloadUrl}?${params.toString()}`;
+}
+
+
+function limpiarFiltros() {
+    document.getElementById('filtro-nombre').value = '';
+    document.getElementById('filtro-departamento').value = '';
+    document.getElementById('filtro-fecha').value = '';
+    document.getElementById('filtro-form').submit();
+}
+
+// Variables globales
+let reportesDataUltra = [];
+
+// Función para generar nombres de archivo personalizados
+async function generarNombreArchivo(extension, idUsuario, nombre, departamento, esCompleto = false) {
+    const fecha = new Date().toISOString().split('T')[0];
+    let nombreBase = "Reporte General";
+    
+    try {
+        // Si hay ID de usuario, buscar el nombre de la persona
+        if (idUsuario && idUsuario.trim() !== '') {
+            // Intentar obtener el nombre desde los datos ya cargados
+            if (reportesDataUltra.length > 0) {
+                const usuario = reportesDataUltra.find(reporte => reporte.id_usuario === idUsuario);
+                if (usuario && usuario.nombre) {
+                    nombreBase = `Reporte de ${usuario.nombre}`;
+                } else {
+                    nombreBase = `Reporte de Usuario ${idUsuario}`;
+                }
+            } else {
+                // Si no hay datos cargados, hacer una consulta rápida
+                try {
+                    const response = await fetch(`/reportes/api/usuario/${idUsuario}/`);
+                    const userData = await response.json();
+                    if (userData.success && userData.nombre) {
+                        nombreBase = `Reporte de ${userData.nombre}`;
+                    } else {
+                        nombreBase = `Reporte de Usuario ${idUsuario}`;
+                    }
+                } catch (error) {
+                    nombreBase = `Reporte de Usuario ${idUsuario}`;
+                }
+            }
+        }
+        // Si hay nombre directamente especificado
+        else if (nombre && nombre.trim() !== '') {
+            nombreBase = `Reporte de ${nombre}`;
+        }
+        // Si hay departamento seleccionado
+        else if (departamento && departamento.trim() !== '') {
+            nombreBase = `Reporte de ${departamento}`;
+        }
+        
+        // Añadir sufijo si es reporte completo
+        if (esCompleto) {
+            nombreBase += " - Completo";
+        }
+        
+        // Limpiar caracteres especiales del nombre
+        nombreBase = nombreBase.replace(/[<>:"/\\|?*]/g, '');
+        
+        return `${nombreBase} ${fecha}.${extension}`;
+        
+    } catch (error) {
+        console.error('Error generando nombre de archivo:', error);
+        return `Reporte General ${fecha}.${extension}`;
+    }
+}
+
+// Inicialización
+document.addEventListener('DOMContentLoaded', function() {
+    inicializarDashboardUltra();
+});
+
+function inicializarDashboardUltra() {
+    // Solo establecer fecha de hoy si los campos están vacíos
+    const fechaInicioField = document.getElementById('fechaInicio');
+    const fechaFinField = document.getElementById('fechaFin');
+    
+    if (!fechaInicioField.value) {
+        const hoy = new Date().toISOString().split('T')[0];
+        fechaInicioField.value = hoy;
+    }
+    
+    if (!fechaFinField.value) {
+        const hoy = new Date().toISOString().split('T')[0];
+        fechaFinField.value = hoy;
+    }
+    
+    // Cargar departamentos
+    cargarDepartamentosUltra();
+    
+    // Animar contadores
+    animarContadores();
+    
+    // Actualizar reloj
+    setInterval(actualizarRelojUltra, 1000);
+    
+    // Buscar reportes iniciales solo si ambas fechas tienen valores
+    if (fechaInicioField.value && fechaFinField.value) {
+        setTimeout(() => buscarReportesUltra(), 1000);
+    }
+}
+
+function actualizarRelojUltra() {
+    const ahora = new Date();
+    const tiempo = ahora.toLocaleTimeString('es-MX');
+    document.getElementById('reloj-ultra').textContent = tiempo;
+}
+
+function animarContadores() {
+    document.querySelectorAll('.animate-counter').forEach(counter => {
+        const target = parseInt(counter.getAttribute('data-target'));
+        const increment = target / 50;
+        let current = 0;
+        
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+                current = target;
+                clearInterval(timer);
+            }
+            counter.textContent = Math.floor(current);
+        }, 40);
+    });
+}
+
+async function cargarDepartamentosUltra() {
+    try {
+        const response = await fetch('/reportes/api/departamentos/');
+        const departamentos = await response.json();
+        
+        const select = document.getElementById('departamento');
+        select.innerHTML = '<option value="">Todos los departamentos</option>';
+        
+        departamentos.forEach(dept => {
+            const option = document.createElement('option');
+            option.value = dept;
+            option.textContent = dept;
+            select.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error cargando departamentos:', error);
+        mostrarNotificacionUltra('Error cargando departamentos', 'error');
+    }
+}
+
+async function buscarReportesUltra() {
+    mostrarLoadingUltra(true);
+    
+    try {
+        const form = document.getElementById('filtrosUltraForm');
+        const formData = new FormData(form);
+        const params = new URLSearchParams(formData);
+        
+        const response = await fetch(`/reportes/api/reports/?${params}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            reportesDataUltra = data.data;
+            mostrarReportesTablaUltra(reportesDataUltra);
+            // No necesitamos mostrar/ocultar la tabla, ya está visible
+        } else {
+            throw new Error('Error obteniendo reportes');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarNotificacionUltra('Error buscando reportes: ' + error.message, 'error');
+    } finally {
+        mostrarLoadingUltra(false);
+    }
+}
+
+function mostrarReportesTablaUltra(reportes) {
+    const tbody = document.getElementById('tablaReportes');
+    tbody.innerHTML = '';
+    
+    // Contadores para estadísticas
+    let totalAtrasados = 0;
+    let idsRegistrados = new Set();
+    
+    if (reportes.length === 0) {
+        // Mostrar mensaje cuando no hay resultados
+        tbody.innerHTML = `
+<script>
+function getBaseUrl() {
+    return window.location.protocol + "//" + window.location.host;
+}
+
+// ...existing code...
+
+// Inicializar el dashboard y conectar eventos de botones
+document.addEventListener('DOMContentLoaded', function() {
+    inicializarDashboardUltra();
+    // Conectar eventos a los botones por id
+    document.getElementById('btnBuscarReportes').onclick = buscarReportesUltra;
+    document.getElementById('btnDescargarPDF').onclick = descargarPDFInteligente;
+    document.getElementById('btnDescargarExcelSimple').onclick = descargarExcelInteligente;
+    document.getElementById('btnDescargarExcelCompleto').onclick = descargarExcelAvanzado;
+    document.getElementById('btnLimpiarFiltros').onclick = limpiarFiltrosUltra;
+});
+
+// Asegurar que las funciones de descarga estén en el scope global
+window.descargarPDFInteligente = descargarPDFInteligente;
+window.descargarExcelInteligente = descargarExcelInteligente;
+window.descargarExcelAvanzado = descargarExcelAvanzado;
+</script>
+        const tr = document.createElement('tr');
+        if (reporte.observacion === 'Atraso') {
+            tr.classList.add('atraso');
+            totalAtrasados++;
+        }
+        
+        // Registrar IDs únicos que han marcado
+        idsRegistrados.add(reporte.id_usuario);
+        
+        tr.innerHTML = `
+            <td>${reporte.id_usuario || ''}</td>
+            <td>${reporte.nombre || ''}</td>
+            <td>${reporte.departamento || ''}</td>
+            <td>${reporte.fecha || ''}</td>
+            <td>${reporte.hora_ingreso || ''}</td>
+            <td>${reporte.hora_inicio_descanso || ''}</td>
+            <td>${reporte.hora_fin_descanso || ''}</td>
+            <td>${reporte.hora_salida || ''}</td>
+            <td>${reporte.observacion || ''}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+    
+    // Actualizar contadores en las tarjetas
+    document.getElementById('totalAtrasados').textContent = totalAtrasados;
+    // Calcular faltas (250 - los que han marcado)
+    const totalFaltas = 250 - idsRegistrados.size;
+    document.getElementById('totalFaltas').textContent = totalFaltas;
+    
+    // Actualizar el contador de registros
+    document.getElementById('totalRegistros').textContent = `${reportes.length} registros`;
+}
+
+function actualizarInformacion(idUsuario) {
+    const boton = document.querySelector(`[data-id="${idUsuario}"] .btn-actualizar`);
+    if (boton) {
+        // Mostrar estado de carga
+        const iconoOriginal = boton.innerHTML;
+        boton.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Actualizando...';
+        boton.disabled = true;
+        
+        // Simular actualización
+        setTimeout(() => {
+            // Restaurar estado original
+            boton.innerHTML = iconoOriginal;
+            boton.disabled = false;
+            
+            // Mostrar notificación
+            const toast = new bootstrap.Toast(document.createElement('div'));
+            toast.show();
+        }, 1000);
+    }
+}
+
+async function descargarPDFInteligente() {
+    mostrarLoadingUltra(true);
+    try {
+        if (!reportesDataUltra || reportesDataUltra.length === 0) {
+            mostrarNotificacionUltra('No hay reportes para descargar. Realiza una búsqueda primero.', 'error');
+            mostrarLoadingUltra(false);
+            return;
+        }
+        const form = document.getElementById('filtrosUltraForm');
+        const formData = new FormData(form);
+        const idUsuario = formData.get('id_usuario');
+        const nombre = formData.get('nombre');
+        const departamento = formData.get('departamento');
+        let nombreArchivo = await generarNombreArchivo('pdf', idUsuario, nombre, departamento);
+        formData.append('orientation', 'landscape');
+        formData.append('format', 'REPORTE DE ASISTENCIA');
+        formData.append('highlight_atraso', 'true');
+        const params = new URLSearchParams(formData);
+        mostrarNotificacionUltra('Generando reporte PDF horizontal...', 'info');
+        const response = await fetch(`/reportes/api/reports/pdf/?${params}`);
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = nombreArchivo;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            mostrarNotificacionUltra('PDF descargado exitosamente', 'success');
+        } else {
+            const errorText = await response.text();
+            mostrarNotificacionUltra('Error al generar PDF: ' + errorText, 'error');
+            throw new Error('Error al generar PDF: ' + errorText);
+        }
+    } catch (error) {
+        console.error('Error descargando PDF:', error);
+        mostrarNotificacionUltra('Error al descargar PDF: ' + error.message, 'error');
+    } finally {
+        mostrarLoadingUltra(false);
+    }
+}
+window.descargarPDFInteligente = descargarPDFInteligente;
+
+async function descargarExcelInteligente() {
+    mostrarLoadingUltra(true);
+    try {
+        if (!reportesDataUltra || reportesDataUltra.length === 0) {
+            mostrarNotificacionUltra('No hay reportes para descargar. Realiza una búsqueda primero.', 'error');
+            mostrarLoadingUltra(false);
+            return;
+        }
+        const form = document.getElementById('filtrosUltraForm');
+        const formData = new FormData(form);
+        const idUsuario = formData.get('id_usuario');
+        const nombre = formData.get('nombre');
+        const departamento = formData.get('departamento');
+        let nombreArchivo = await generarNombreArchivo('xlsx', idUsuario, nombre, departamento);
+        formData.append('format', 'REPORTE DE ASISTENCIA');
+        formData.append('highlight_atraso', 'true');
+        formData.append('headers', JSON.stringify([
+            'ID Usuario',
+            'Nombre',
+            'Departamento',
+            'Fecha',
+            'Hora Ingreso',
+            'Inicio Descanso',
+            'Fin Descanso',
+            'Hora Salida',
+            'Observaciones'
+        ]));
+        const params = new URLSearchParams(formData);
+        mostrarNotificacionUltra('Generando reporte Excel...', 'info');
+        const response = await fetch(`/reportes/api/reports/excel/?${params}`);
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = nombreArchivo;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            mostrarNotificacionUltra('Excel descargado exitosamente', 'success');
+        } else {
+            const errorText = await response.text();
+            mostrarNotificacionUltra('Error al generar Excel: ' + errorText, 'error');
+            throw new Error('Error al generar Excel: ' + errorText);
+        }
+    } catch (error) {
+        console.error('Error descargando Excel:', error);
+        mostrarNotificacionUltra('Error al descargar Excel: ' + error.message, 'error');
+    } finally {
+        mostrarLoadingUltra(false);
+    }
+}
+window.descargarExcelInteligente = descargarExcelInteligente;
+
+async function descargarExcelAvanzado() {
+    mostrarLoadingUltra(true);
+    try {
+        if (!reportesDataUltra || reportesDataUltra.length === 0) {
+            mostrarNotificacionUltra('No hay reportes para descargar. Realiza una búsqueda primero.', 'error');
+            mostrarLoadingUltra(false);
+            return;
+        }
+        const form = document.getElementById('filtrosUltraForm');
+        const formData = new FormData(form);
+        formData.append('highlight_atraso', 'true');
+        const idUsuario = formData.get('id_usuario');
+        const nombre = formData.get('nombre');
+        const departamento = formData.get('departamento');
+        let nombreArchivo = await generarNombreArchivo('xlsx', idUsuario, nombre, departamento, true);
+        let tipoReporte = 'general';
+        let descripcion = 'Excel Completo';
+        if (idUsuario && idUsuario !== '') {
+            tipoReporte = 'individual';
+            descripcion = 'Excel Completo Individual por ID';
+        } else if (nombre && nombre !== '') {
+            tipoReporte = 'individual';
+            descripcion = 'Excel Completo Individual por Nombre';
+        } else if (departamento && departamento !== '') {
+            tipoReporte = 'departamental';
+            descripcion = 'Excel Completo por Departamento';
+        }
+        const params = new URLSearchParams(formData);
+        mostrarNotificacionUltra(`Generando ${descripcion}...`, 'info');
+        const response = await fetch(`/reportes/api/reports/excel-advanced/?${params}`);
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = nombreArchivo;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            mostrarNotificacionUltra(`${descripcion} descargado exitosamente`, 'success');
+        } else {
+            const errorText = await response.text();
+            mostrarNotificacionUltra('Error al generar Excel avanzado: ' + errorText, 'error');
+            throw new Error('Error al generar Excel avanzado: ' + errorText);
+        }
+    } catch (error) {
+        console.error('Error descargando Excel avanzado:', error);
+        mostrarNotificacionUltra('Error al descargar Excel avanzado: ' + error.message, 'error');
+    } finally {
+        mostrarLoadingUltra(false);
+    }
+}
+window.descargarExcelAvanzado = descargarExcelAvanzado;
+
+function limpiarFiltrosUltra() {
+    document.getElementById('filtrosUltraForm').reset();
+    const hoy = new Date().toISOString().split('T')[0];
+    document.getElementById('fechaInicio').value = hoy;
+    document.getElementById('fechaFin').value = hoy;
+    buscarReportesUltra();
+    mostrarNotificacionUltra('Filtros limpiados', 'info');
+}
+function mostrarLoadingUltra(show) {
+    document.getElementById('loadingUltra').style.display = show ? 'block' : 'none';
+}
+function mostrarNotificacionUltra(mensaje, tipo) {
+    const iconos = {
+        'success': 'bi-check-circle',
+        'error': 'bi-exclamation-triangle',
+        'warning': 'bi-exclamation-circle',
+        'info': 'bi-info-circle'
+    };
+
+    const colores = {
+        'success': 'alert-success',
+        'error': 'alert-danger',
+        'warning': 'alert-warning',
+        'info': 'alert-info'
+    };
+
+    const notification = document.createElement('div');
+    notification.className = `alert ${colores[tipo]} notification-ultra alert-dismissible fade show`;
+    notification.innerHTML = `
+        <i class="bi ${iconos[tipo]}"></i> ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 5000);
+}
+
+function toggleSidebar() {
+    document.querySelector('.sidebar').classList.toggle('show');
+}
+
+// Cerrar sidebar al hacer clic fuera en dispositivos móviles
+document.addEventListener('click', function(event) {
+    const sidebar = document.querySelector('.sidebar');
+    const toggleBtn = document.querySelector('.toggle-sidebar');
+    
+    if (window.innerWidth <= 768) {
+        if (!sidebar.contains(event.target) && !toggleBtn.contains(event.target)) {
+            sidebar.classList.remove('show');
+        }
+    }
+});
+
+function filtrarResultados(valor) {
+    const filtro = valor.toLowerCase();
+    const filas = document.querySelectorAll('#tablaReportes tr');
+    let registrosVisibles = 0;
+    
+    filas.forEach(fila => {
+        const celdas = fila.querySelectorAll('td');
+        let textoFila = '';
+        
+        // Solo incluir ID, Nombre y Departamento en el filtro (primeras 3 columnas)
+        celdas.forEach((celda, index) => {
+            if (index === 0 || index === 1 || index === 2) {
+                textoFila += celda.textContent.toLowerCase() + ' ';
+            }
+        });
+        
+        if (textoFila.includes(filtro)) {
+            fila.style.display = '';
+            registrosVisibles++;
+        } else {
+            fila.style.display = 'none';
+        }
+    });
+    
+    // Actualizar contador de registros visibles
+    document.getElementById('totalRegistros').textContent = `${registrosVisibles} registros`;
+}
+
+function formatearFechaUltra(fecha) {
+    if (!fecha) return '';
+    const date = new Date(fecha);
+    return date.toLocaleDateString('es-MX');
+}
+
+function mostrarAyudaUltra() {
+    mostrarNotificacionUltra('Sistema de Reportes Biométrico: Cache inteligente, rate limiting, middleware personalizado, PDFs avanzados y más!', 'info');
+}
+
+// Inicializar el dashboard cuando el documento esté listo
+document.addEventListener('DOMContentLoaded', inicializarDashboardUltra);
+
+// Asegurar que las funciones de descarga estén en el scope global
+window.descargarPDFInteligente = descargarPDFInteligente;
+window.descargarExcelInteligente = descargarExcelInteligente;
+window.descargarExcelAvanzado = descargarExcelAvanzado;
+</script>
+{% endblock extra_js %}

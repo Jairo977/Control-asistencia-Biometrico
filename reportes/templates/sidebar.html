@@ -1,0 +1,55 @@
+
+{% load static %}
+<!-- Botón para móvil -->
+<button class="toggle-sidebar d-md-none" onclick="toggleSidebar()">
+    <i class="bi bi-list"></i>
+</button>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <img src="{% static 'img/logo1.jpg' %}" alt="Logo" class="sidebar-logo">
+    </div>
+    <nav class="sidebar-nav">
+        <a href="{% url 'reportes:bienvenida' %}" class="sidebar-item" title="Bienvenida al sistema">
+            <i class="bi bi-house"></i> Inicio
+        </a>
+        <a href="{% url 'reportes:registros_hoy' %}" class="sidebar-item" title="Registros de hoy">
+            <i class="bi bi-person-badge"></i> Registros
+        </a>
+        <a href="{% url 'reportes:registros_hoy_dashboard' %}" class="sidebar-item" title="Lista de todos los usuarios">
+            <i class="bi bi-people"></i> Lista de Usuarios
+        </a>
+        <a href="{% url 'reportes:reportes_section' %}" class="sidebar-item" title="Generación de reportes">
+            <i class="bi bi-file-earmark-text"></i> Reportes
+        </a>
+        {% if rol == 'admin' or request.user.is_superuser %}
+        <a href="{% url 'reportes:configuracion_section' %}" class="sidebar-item" title="Ajustes del sistema">
+            <i class="bi bi-gear"></i> Configuración
+        </a>
+        <a href="{% url 'reportes:dashboard_admin' %}" class="sidebar-item" title="Administración de usuarios">
+            <i class="bi bi-person-gear"></i> Administración
+            <small class="d-block text-warning ps-4 mt-1" style="font-size: 0.75rem;">Solo administradores</small>
+        </a>
+        {% endif %}
+        <a href="{% url 'reportes:ayuda' %}" class="sidebar-item" title="Centro de ayuda">
+            <i class="bi bi-question-circle"></i> Ayuda
+            <small class="d-block text-muted ps-4 mt-1" style="font-size: 0.75rem;">Guías y soporte</small>
+        </a>
+        <form id="logout-form" action="{% url 'reportes:logout' %}" method="post" style="display: none;">
+            {% csrf_token %}
+        </form>
+        <a href="#" onclick="document.getElementById('logout-form').submit(); return false;" class="sidebar-item" title="Cerrar sesión">
+            <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+            <small class="d-block text-muted ps-4 mt-1" style="font-size: 0.75rem;">Finalizar la sesión actual</small>
+        </a>
+    </nav>
+</div>
+
+<script>
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar) {
+        sidebar.classList.toggle('active');
+    }
+}
+</script>

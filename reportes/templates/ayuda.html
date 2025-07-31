@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block sidebar %}
+    {% include 'sidebar.html' %}
+{% endblock %}
+{% block title %}Centro de Ayuda{% endblock %}
+{% block content %}
+<div class="fondo-logo2 position-fixed w-100 h-100" style="top:0;left:0;z-index:-1;"></div>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow animated fadeIn">
+                <div class="card-body">
+                    <h1 class="display-5 mb-4 text-gradient"><i class="bi bi-question-circle me-2"></i>Centro de Ayuda</h1>
+                    <p class="lead">Encuentra respuestas, guías y soporte técnico para el sistema biométrico.</p>
+                    <hr>
+                    <div class="mb-4">
+                        <h4><i class="bi bi-book"></i> Guía de Usuario</h4>
+                        <p>Descarga la guía completa del sistema o revisa los pasos básicos para comenzar.</p>
+                        <a href="https://drive.google.com/file/d/1gwnRdkhGB0oxgiy8OlsqGdPTsnqzYAef/view" target="_blank" class="btn btn-outline-primary"><i class="bi bi-download"></i> Descargar Guía</a>
+                    </div>
+                    <div class="mb-4">
+                        <h4><i class="bi bi-question"></i> Preguntas Frecuentes</h4>
+                        <ul>
+                            <li>¿Cómo registro un nuevo usuario?</li>
+                            <li>¿Cómo genero un reporte?</li>
+                            <li>¿Cómo cambio mi contraseña?</li>
+                        </ul>
+                    </div>
+                    <div class="mb-4">
+                        <h4><i class="bi bi-whatsapp"></i> Soporte Técnico</h4>
+                        <p>¿Tienes un problema? Contacta al soporte directamente por WhatsApp.</p>
+                        <a href="https://wa.me/593994060401" target="_blank" class="btn btn-success"><i class="bi bi-whatsapp"></i> WhatsApp Soporte</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .fondo-logo2 {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: url('{% static "img/logo2.jpg" %}') center center/cover no-repeat;
+        z-index: -1;
+        opacity: 1;
+    }
+    .animated {animation-duration: 0.8s; animation-fill-mode: both;}
+    .fadeIn {animation-name: fadeIn;}
+    @keyframes fadeIn {from {opacity: 0;} to {opacity: 1;}}
+</style>
+{% endblock %}

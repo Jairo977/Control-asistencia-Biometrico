@@ -1,0 +1,429 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Reportes de Asistencia{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+<!-- No custom sidebar styles, use global styles.css -->
+{% endblock %}
+{% block content %}
+<script>
+document.body.classList.add('fondo-logo2');
+</script>
+<!-- Botón para móvil -->
+<button class="toggle-sidebar d-md-none" onclick="toggleSidebar()">
+    <i class="bi bi-list"></i>
+</button>
+
+<!-- Barra lateral igual a registros hoy -->
+<div class="sidebar">
+    <div class="sidebar-header">
+        <img src="{% static 'img/logo1.jpg' %}" alt="Logo" class="sidebar-logo">
+    </div>
+    <nav class="sidebar-nav">
+        <a href="{% url 'reportes:bienvenida' %}" class="sidebar-item" title="Bienvenida al sistema">
+            <i class="bi bi-house"></i> Inicio
+        </a>
+        <a href="{% url 'reportes:registros_hoy' %}" class="sidebar-item" title="Registros de hoy">
+            <i class="bi bi-person-badge"></i> Registros
+        </a>
+        <a href="{% url 'reportes:reportes_section' %}" class="sidebar-item" title="Generación de reportes">
+            <i class="bi bi-file-earmark-text"></i> Reportes
+        </a>
+        {% if rol == 'admin' or request.user.is_superuser %}
+        <a href="{% url 'reportes:configuracion_section' %}" class="sidebar-item" title="Ajustes del sistema">
+            <i class="bi bi-gear"></i> Configuración
+        </a>
+        <a href="{% url 'reportes:dashboard_admin' %}" class="sidebar-item" title="Administración de usuarios">
+            <i class="bi bi-person-gear"></i> Administración
+            <small class="d-block text-warning ps-4 mt-1" style="font-size: 0.75rem;">Solo administradores</small>
+        </a>
+        {% endif %}
+        <a href="{% url 'reportes:ayuda' %}" class="sidebar-item" title="Centro de ayuda">
+            <i class="bi bi-question-circle"></i> Ayuda
+            <small class="d-block text-muted ps-4 mt-1" style="font-size: 0.75rem;">Guías y soporte</small>
+        </a>
+        <form id="logout-form" action="{% url 'reportes:logout' %}" method="post" style="display: none;">
+            {% csrf_token %}
+        </form>
+        <a href="#" onclick="document.getElementById('logout-form').submit(); return false;" class="sidebar-item" title="Cerrar sesión">
+            <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+            <small class="d-block text-muted ps-4 mt-1" style="font-size: 0.75rem;">Finalizar la sesión actual</small>
+        </a>
+    </nav>
+</div>
+<div class="dashboard-ultra">
+    <div class="container-fluid py-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div>
+                    <h1 class="text-gradient" style="text-align:left;">REPORTES DE ASISTENCIA</h1>
+                </div>
+            </div>
+        </div>
+        <!-- Tarjetas de estadísticas -->
+        <div class="row mb-4 justify-content-start" style="text-align:left;">
+            <div class="col-md-4 mb-3">
+                <div class="stats-card-ultra">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="bi bi-people stats-icon-ultra text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h3>{{ total_personal }}</h3>
+                            <p class="mb-0 text-muted">Total Personal</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="stats-card-ultra">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="bi bi-clock-history stats-icon-ultra text-danger"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h3 id="totalAtrasados">{{ atrasados_hoy }}</h3>
+                            <p class="mb-0 text-muted">Atrasados Hoy</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="stats-card-ultra">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="bi bi-person-x stats-icon-ultra text-warning"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h3 id="totalFaltas">{{ no_han_marcado }}</h3>
+                            <p class="mb-0 text-muted">No han Marcado</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de filtros ultra -->
+        <div class="filter-card-ultra p-4 mb-4" style="text-align:left;">
+            <h5 class="mb-3">
+                <i class="bi bi-funnel-fill"></i> Panel de Control de Reportes
+            </h5>
+            <form id="filtrosUltraForm" method="get" action="">
+                <div class="row justify-content-start">
+                    <div class="col-lg-2 col-md-4 mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-calendar-event"></i> Desde
+                        </label>
+                        <input type="date" class="form-control form-control-ultra" id="fechaInicio" name="fecha_inicio" value="{{ fecha_inicio }}">
+                    </div>
+                    <div class="col-lg-2 col-md-4 mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-calendar-event"></i> Hasta
+                        </label>
+                        <input type="date" class="form-control form-control-ultra" id="fechaFin" name="fecha_fin" value="{{ fecha_fin }}">
+                    </div>
+                    <div class="col-lg-2 col-md-4 mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-person-badge"></i> ID Usuario
+                        </label>
+                        <input type="text" class="form-control form-control-ultra" id="idUsuario" name="id_usuario" placeholder="ID Usuario">
+                    </div>
+                    <div class="col-lg-2 col-md-4 mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-person"></i> Nombre
+                        </label>
+                        <input type="text" class="form-control form-control-ultra" id="nombreUsuario" name="nombre" placeholder="Nombre">
+                    </div>
+                    <div class="col-lg-3 col-md-4 mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-building"></i> Departamento
+                        </label>
+                        <select class="form-select select-ultra" id="departamento" name="departamento">
+                            <option value="">Todos</option>
+                            {% for dept in departamentos %}
+                                <option value="{{ dept }}" {% if departamento == dept %}selected{% endif %}>{{ dept }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 d-flex flex-wrap gap-2 justify-content-start">
+                        <button type="button" class="btn btn-primary btn-ultra" onclick="buscarReportesUltra()">
+                            <i class="bi bi-search"></i> Buscar Reportes
+                        </button>
+                        <button type="button" class="btn btn-danger btn-ultra" onclick="descargarPDFInteligente()">
+                            <i class="bi bi-file-pdf"></i> Descargar PDF
+                        </button>
+                        <button type="button" class="btn btn-success btn-ultra" onclick="descargarExcelInteligente()">
+                            <i class="bi bi-file-excel"></i> Excel Simple
+                        </button>
+                        <button type="button" class="btn btn-info btn-ultra" onclick="descargarExcelAvanzado()">
+                            <i class="bi bi-file-excel-fill"></i> Excel Completo
+                        </button>
+                        <button type="button" class="btn btn-outline-light btn-ultra" onclick="limpiarFiltrosUltra()">
+                            <i class="bi bi-arrow-clockwise"></i> Limpiar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Sección independiente para la tabla -->
+    <div class="container py-2">
+        <div class="row mb-2">
+            <div class="col-12">
+                <div class="search-controls mb-2">
+                    <div class="search-wrapper">
+                        <div class="input-group search-box">
+                            <span class="input-group-text">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="filtroRapido" placeholder="Buscar por ID o Nombre..." oninput="filtrarResultados(this.value)">
+                        </div>
+                    </div>
+                </div>
+                <div class="card shadow animated fadeIn">
+                    <div class="card-body">
+                        <div class="table-header-panel d-flex align-items-center mb-2" style="text-align:left;">
+                            <i class="bi bi-table me-2"></i>
+                            <h5 class="mb-0">Resultados de Reportes</h5>
+                            <span class="badge bg-white text-primary px-3 py-2 ms-3" id="totalRegistros">0 registros</span>
+                        </div>
+                        <div class="table-responsive table-scroll-container table-reportes-container">
+                            <table class="table table-ultra mb-0" style="min-width:900px; table-layout:auto;">
+                                <thead>
+                                    <tr>
+                                        <th class="column-id"><i class="bi bi-person-badge"></i> ID</th>
+                                        <th class="column-nombre"><i class="bi bi-person"></i> NOMBRE</th>
+                                        <th class="column-departamento"><i class="bi bi-building"></i> DEPARTAMENTO</th>
+                                        <th class="column-fecha"><i class="bi bi-calendar3"></i> FECHA</th>
+                                        <th class="column-marcacion"><i class="bi bi-clock"></i> PRIMERA MARCACIÓN</th>
+                                        <th class="column-marcacion"><i class="bi bi-clock"></i> SEGUNDA MARCACIÓN</th>
+                                        <th class="column-marcacion"><i class="bi bi-clock"></i> TERCERA MARCACIÓN</th>
+                                        <th class="column-marcacion"><i class="bi bi-clock"></i> CUARTA MARCACIÓN</th>
+                                        <th class="column-observacion"><i class="bi bi-flag-fill"></i> OBSERVACIONES</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaReportes">
+                                        {% for reporte in reportes %}
+                                        <tr>
+                                        <td style="white-space:nowrap;">{{ reporte.id_usuario }}</td>
+                                        <td style="white-space:normal;">{{ reporte.nombre }}</td>
+                                        <td style="white-space:normal;">{{ reporte.departamento }}</td>
+                                        <td style="white-space:nowrap;">{{ reporte.fecha }}</td>
+                                        <td style="white-space:nowrap;">{{ reporte.hora_ingreso }}</td>
+                                        <td style="white-space:nowrap;">{{ reporte.hora_inicio_descanso }}</td>
+                                        <td style="white-space:nowrap;">{{ reporte.hora_fin_descanso }}</td>
+                                        <td style="white-space:nowrap;">{{ reporte.hora_salida }}</td>
+                                        <td style="white-space:normal;">{{ reporte.observacion }}</td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr><td colspan="9">No hay reportes para los filtros seleccionados.</td></tr>
+                                        {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf-autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="{% static 'js/scripts.js' %}"></script>
+<script>
+let reportesDataUltra = [];
+
+async function buscarReportesUltra() {
+    try {
+        const form = document.getElementById('filtrosUltraForm');
+        const formData = new FormData(form);
+        const params = new URLSearchParams(formData);
+        const response = await fetch(`/reportes/api/reports/?${params}`);
+        const data = await response.json();
+        if (data.success) {
+            reportesDataUltra = data.data;
+            mostrarReportesTablaUltra(reportesDataUltra);
+        } else {
+            mostrarReportesTablaUltra([]);
+        }
+    } catch (error) {
+        mostrarReportesTablaUltra([]);
+    }
+}
+
+function mostrarReportesTablaUltra(reportes) {
+    const tbody = document.getElementById('tablaReportes');
+    tbody.innerHTML = '';
+    let totalAtrasados = 0;
+    let idsRegistrados = new Set();
+    if (reportes.length === 0) {
+        tbody.innerHTML = `<tr><td colspan='9' class='text-center py-5'>No hay reportes para los filtros seleccionados.</td></tr>`;
+        document.getElementById('totalRegistros').textContent = '0 registros';
+        return;
+    }
+    reportes.forEach(reporte => {
+        const tr = document.createElement('tr');
+        if (reporte.observacion === 'Atraso') {
+            tr.classList.add('table-danger');
+            totalAtrasados++;
+        }
+        idsRegistrados.add(reporte.id_usuario);
+        tr.innerHTML = `
+            <td>${reporte.id_usuario || ''}</td>
+            <td>${reporte.nombre || ''}</td>
+            <td>${reporte.departamento || ''}</td>
+            <td>${reporte.fecha || ''}</td>
+            <td>${reporte.hora_ingreso || ''}</td>
+            <td>${reporte.hora_inicio_descanso || ''}</td>
+            <td>${reporte.hora_fin_descanso || ''}</td>
+            <td>${reporte.hora_salida || ''}</td>
+            <td>${reporte.observacion || ''}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+    document.getElementById('totalAtrasados').textContent = totalAtrasados;
+    // Usar el valor real de total_personal desde el backend
+    const totalPersonal = window.TOTAL_PERSONAL || 0;
+    document.getElementById('totalFaltas').textContent = Math.max(0, totalPersonal - idsRegistrados.size);
+    document.getElementById('totalRegistros').textContent = `${reportes.length} registros`;
+}
+
+async function descargarPDFInteligente() {
+    if (!reportesDataUltra || reportesDataUltra.length === 0) {
+        alert('No hay reportes para descargar. Realiza una búsqueda primero.');
+        return;
+    }
+    const form = document.getElementById('filtrosUltraForm');
+    const formData = new FormData(form);
+    const idUsuario = formData.get('id_usuario');
+    const nombre = formData.get('nombre');
+    const departamento = formData.get('departamento');
+    let nombreArchivo = `Reporte_${idUsuario || nombre || departamento || 'General'}.pdf`;
+    formData.append('orientation', 'landscape');
+    formData.append('format', 'REPORTE DE ASISTENCIA');
+    formData.append('highlight_atraso', 'true');
+    const params = new URLSearchParams(formData);
+    const response = await fetch(`/reportes/api/reports/pdf/?${params}`);
+    if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nombreArchivo;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    } else {
+        alert('Error al generar PDF');
+    }
+}
+
+async function descargarExcelInteligente() {
+    if (!reportesDataUltra || reportesDataUltra.length === 0) {
+        alert('No hay reportes para descargar. Realiza una búsqueda primero.');
+        return;
+    }
+    const form = document.getElementById('filtrosUltraForm');
+    const formData = new FormData(form);
+    const idUsuario = formData.get('id_usuario');
+    const nombre = formData.get('nombre');
+    const departamento = formData.get('departamento');
+    let nombreArchivo = `Reporte_${idUsuario || nombre || departamento || 'General'}.xlsx`;
+    formData.append('format', 'REPORTE DE ASISTENCIA');
+    formData.append('highlight_atraso', 'true');
+    formData.append('headers', JSON.stringify([
+        'ID Usuario', 'Nombre', 'Departamento', 'Fecha', 'Hora Ingreso', 'Inicio Descanso', 'Fin Descanso', 'Hora Salida', 'Observaciones'
+    ]));
+    const params = new URLSearchParams(formData);
+    const response = await fetch(`/reportes/api/reports/excel/?${params}`);
+    if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nombreArchivo;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    } else {
+        alert('Error al generar Excel');
+    }
+}
+
+async function descargarExcelAvanzado() {
+    if (!reportesDataUltra || reportesDataUltra.length === 0) {
+        alert('No hay reportes para descargar. Realiza una búsqueda primero.');
+        return;
+    }
+    const form = document.getElementById('filtrosUltraForm');
+    const formData = new FormData(form);
+    formData.append('highlight_atraso', 'true');
+    const idUsuario = formData.get('id_usuario');
+    const nombre = formData.get('nombre');
+    const departamento = formData.get('departamento');
+    let nombreArchivo = `ReporteCompleto_${idUsuario || nombre || departamento || 'General'}.xlsx`;
+    const params = new URLSearchParams(formData);
+    const response = await fetch(`/reportes/api/reports/excel-advanced/?${params}`);
+    if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nombreArchivo;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    } else {
+        alert('Error al generar Excel avanzado');
+    }
+}
+
+function limpiarFiltrosUltra() {
+    document.getElementById('idUsuario').value = '';
+    document.getElementById('nombreUsuario').value = '';
+    document.getElementById('departamento').value = '';
+    buscarReportesUltra();
+}
+
+function filtrarResultados(valor) {
+    const filtro = valor.toLowerCase();
+    const filas = document.querySelectorAll('#tablaReportes tr');
+    let registrosVisibles = 0;
+    filas.forEach(fila => {
+        const celdas = fila.querySelectorAll('td');
+        let textoFila = '';
+        celdas.forEach((celda, index) => {
+            if (index === 0 || index === 1 || index === 2) {
+                textoFila += celda.textContent.toLowerCase() + ' ';
+            }
+        });
+        if (textoFila.includes(filtro)) {
+            fila.style.display = '';
+            registrosVisibles++;
+        } else {
+            fila.style.display = 'none';
+        }
+    });
+    document.getElementById('totalRegistros').textContent = `${registrosVisibles} registros`;
+}
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inyectar el valor de total_personal como variable global JS
+        window.TOTAL_PERSONAL = parseInt('{{ total_personal|default:0 }}');
+        setTimeout(buscarReportesUltra, 100);
+        document.getElementById('btnBuscarReportes')?.addEventListener('click', buscarReportesUltra);
+        document.getElementById('btnDescargarPDF')?.addEventListener('click', descargarPDFInteligente);
+        document.getElementById('btnDescargarExcelSimple')?.addEventListener('click', descargarExcelInteligente);
+        document.getElementById('btnDescargarExcelCompleto')?.addEventListener('click', descargarExcelAvanzado);
+        document.getElementById('btnLimpiarFiltros')?.addEventListener('click', limpiarFiltrosUltra);
+    });
+</script>
+{% endblock %}

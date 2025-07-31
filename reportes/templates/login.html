@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - Sistema Biométrico</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <style>
+        body {
+            min-height: 100vh;
+            background: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)),
+                        url('{% static "img/logo2.jpg" %}') no-repeat center center fixed;
+            background-size: contain; /* Usar 'contain' para asegurar que el logo se vea completo */
+            position: relative;
+        }
+
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            animation: fadeIn 1s ease;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .login-logo {
+            width: 120px;
+            height: auto;
+            display: block;
+            margin: 0 auto 1.5rem;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+            animation: bounceIn 1s;
+        }
+
+        .input-group .btn-outline-secondary {
+            border-color: #e0e0e0;
+            color: #6c757d;
+            padding: 0.8rem;
+        }
+
+        .input-group .btn-outline-secondary:hover {
+            background-color: #f8f9fa;
+            color: #0d6efd;
+        }
+
+        .form-check-input {
+            cursor: pointer;
+        }
+
+        .form-check-label {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            padding: 0.8rem 1rem;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+            border-color: #0d6efd;
+        }
+
+        .btn-login {
+            padding: 0.8rem;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #0d6efd, #0b5ed7);
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+        }
+
+        .footer-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 576px) {
+            .login-container {
+                padding: 1rem;
+            }
+            
+            .login-card {
+                width: 100%;
+                margin: 1rem;
+            }
+            
+            .login-logo {
+                max-width: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card p-4 p-md-5" style="max-width: 400px; width: 100%;">
+            <img src="{% static 'img/logo1.jpg' %}" alt="Logo Principal" class="login-logo d-block">
+            <h2 class="text-center text-primary mb-4 fw-bold">Iniciar sesión</h2>
+            {% if form.errors %}
+            <div class="alert alert-danger alert-dismissible fade show animate__animated animate__shakeX" role="alert">
+                <strong>¡Error de Autenticación!</strong>
+                <p class="mb-0">Por favor, verifica tu usuario y contraseña. Las credenciales proporcionadas no son válidas.</p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
+
+            {% if user.is_authenticated %}
+            <div class="alert alert-info">
+                Ya has iniciado sesión como <strong>{{ user.username }}</strong>. <a href="{% url 'reportes:bienvenida' %}" class="alert-link">Ir a la Bienvenida</a>.
+            </div>
+            {% else %}
+            <form method="POST" action="{% url 'reportes:login' %}" class="animate__animated animate__fadeInUp">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{% url 'reportes:bienvenida' %}">
+                <div class="input-group mb-3">
+                    <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                    {{ form.username }}
+                </div>
+                <div class="input-group mb-4">
+                    <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                    {{ form.password }}
+                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                        <i class="bi bi-eye-slash"></i>
+                    </button>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-login">Iniciar Sesión</button>
+                </div>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    <div class="footer-bar">
+        <p class="m-0">Desarrollado por UTIC de Gadm Alausi - Copyright © 2025. Todos los derechos reservados.</p>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/scripts.js' %}"></script>
+    <script>
+        // Toggle de contraseña
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
+        
+        togglePassword.addEventListener('click', function (e) {
+            // Toggle del tipo de input
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            
+            // Toggle del icono
+            const icon = this.querySelector('i');
+            icon.classList.toggle('bi-eye');
+            icon.classList.toggle('bi-eye-slash');
+        });
+
+        window.addEventListener('load', function() {
+            const logo = document.querySelector('.login-logo');
+            logo.onerror = function() {
+                // Ocultar la imagen si no se puede cargar
+                this.style.display = 'none';
+            };
+        });
+    </script>
+</body>
+</html>

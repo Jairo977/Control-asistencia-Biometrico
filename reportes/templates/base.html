@@ -1,0 +1,112 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Reportes de Asistencia{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    
+    <!-- Fix para dropdown del navbar -->
+    <style>
+    .navbar {
+        position: relative;
+        z-index: 1030;
+    }
+    
+    .dropdown-menu {
+        position: absolute !important;
+        z-index: 1031 !important;
+        top: 100% !important;
+        right: 0 !important;
+        left: auto !important;
+        min-width: 200px;
+        margin-top: 0.5rem;
+        background-color: rgba(54, 5, 109, 0.98) !important;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+        border-radius: 8px !important;
+    }
+    
+    .dropdown-item {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+    
+    .dropdown-item-text {
+        padding: 0.25rem 1rem !important;
+        font-size: 0.75rem !important;
+    }
+    
+    .dropdown-divider {
+        margin: 0.5rem 0;
+    }
+    
+    /* Asegurar que el contenido principal esté por debajo del navbar */
+    main, .container {
+        position: relative;
+        z-index: 1;
+    }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-light">
+
+    <!-- Mensajes de Django -->
+    {% if messages %}
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 1051;">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <i class="bi bi-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-triangle{% elif message.tags == 'warning' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Sidebar y contenido principal -->
+    <div class="d-flex">
+        {% block sidebar %}{% endblock %}
+        <!-- Contenido principal -->
+        <main class="main-content flex-grow-1 p-4">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light text-center py-3 mt-5">
+        <div class="container">
+            <p class="mb-0">
+                <small>Sistema de Reportes de Asistencia &copy; {% now "Y" %} | 
+                Desarrollado por el equipo de UTIC</small>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+
+    <!-- Script para auto-cerrar mensajes -->
+    <script>
+        // Auto-cerrar mensajes después de 5 segundos
+        setTimeout(function() {
+            let alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                let bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

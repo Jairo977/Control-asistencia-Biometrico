@@ -1,0 +1,80 @@
+# ==============================================================================
+# .gitignore - Sistema de Reportes Django con Waitress
+# ==============================================================================
+
+# Archivos de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Entornos virtuales
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+
+# Variables de entorno
+.env
+.env.local
+.env.development
+.env.production
+.env.waitress
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Sistema operativo
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Archivos temporales
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Logs y datos dinámicos
+logs/
+reportes_generados/
+
+# Archivos de prueba
+test_*.py
+test_*.pdf
+test_*.xlsx
+*_test.py

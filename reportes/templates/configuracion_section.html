@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% block title %}Configuración del Sistema{% endblock %}
+{% block sidebar %}
+    {% include 'sidebar.html' %}
+{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow animated fadeIn">
+                <div class="card-body">
+                    <h1 class="display-5 mb-4 text-gradient"><i class="bi bi-gear me-2"></i>{{ titulo }}</h1>
+                    <p class="lead">{{ descripcion }}</p>
+                    <hr>
+                    <ul class="nav nav-tabs mb-4" id="configTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="parametros-tab" data-bs-toggle="tab" data-bs-target="#parametros" type="button" role="tab"><i class="bi bi-sliders"></i> Parámetros Generales</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="usuarios-tab" data-bs-toggle="tab" data-bs-target="#usuarios" type="button" role="tab"><i class="bi bi-people"></i> Usuarios y Roles</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="notificaciones-tab" data-bs-toggle="tab" data-bs-target="#notificaciones" type="button" role="tab"><i class="bi bi-bell"></i> Notificación y Seguridad</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="ayuda-tab" data-bs-toggle="tab" data-bs-target="#ayuda" type="button" role="tab"><i class="bi bi-question-circle"></i> Ayuda</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="configTabsContent">
+                        <div class="tab-pane fade show active" id="parametros" role="tabpanel">
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="card border-primary shadow-sm animated fadeInLeft mb-4">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="bi bi-building"></i> Empresa</h5>
+                                            <form>
+                                                <div class="mb-3">
+                                                    <label for="empresa" class="form-label">Nombre de la empresa</label>
+                                                    <input type="text" class="form-control" id="empresa" placeholder="Ejemplo S.A.">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="version" class="form-label">Versión del sistema</label>
+                                                    <input type="text" class="form-control" id="version" value="{{ version }}" readonly>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Guardar cambios</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-info shadow-sm animated fadeInRight">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="bi bi-info-circle"></i> Información</h5>
+                                            <ul class="list-unstyled mb-0">
+                                                <li><i class="bi bi-check-circle text-success"></i> Sistema biométrico avanzado</li>
+                                                <li><i class="bi bi-check-circle text-success"></i> Reportes en tiempo real</li>
+                                                <li><i class="bi bi-check-circle text-success"></i> Seguridad y privacidad</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="usuarios" role="tabpanel">
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="card border-success shadow-sm animated fadeInLeft">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="bi bi-person-plus"></i> Gestión de Usuarios</h5>
+                                            <ul>
+                                                <li>Agregar, editar o eliminar usuarios</li>
+                                                <li>Asignar roles y permisos</li>
+                                                <li>Ver listado de usuarios activos</li>
+                                            </ul>
+                                            <div class="alert alert-info mt-3">Funcionalidad en desarrollo</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-warning shadow-sm animated fadeInRight">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="bi bi-shield-lock"></i> Roles y Seguridad</h5>
+                                            <ul>
+                                                <li>Roles personalizados</li>
+                                                <li>Permisos granulares</li>
+                                                <li>Auditoría de cambios</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="notificaciones" role="tabpanel">
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="card border-danger shadow-sm animated fadeInLeft">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="bi bi-envelope"></i> Notificaciones</h5>
+                                            <ul>
+                                                <li>Configurar notificaciones por correo</li>
+                                                <li>Alertas automáticas</li>
+                                                <li>Preferencias de usuario</li>
+                                            </ul>
+                                            <div class="alert alert-info mt-3">Funcionalidad en desarrollo</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-secondary shadow-sm animated fadeInRight">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="bi bi-shield-check"></i> Seguridad</h5>
+                                            <ul>
+                                                <li>Autenticación de dos factores</li>
+                                                <li>Gestión de alertas de seguridad</li>
+                                                <li>Historial de accesos</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="ayuda" role="tabpanel">
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="card border-info shadow-sm animated fadeInLeft">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><i class="bi bi-question-circle"></i> Centro de Ayuda</h5>
+                                            <p>¿Necesitas ayuda? Aquí puedes encontrar guías, preguntas frecuentes y soporte técnico.</p>
+                                            <ul>
+                                                <li><a href="https://wa.me/593994060401" target="_blank" class="btn btn-success mb-2"><i class="bi bi-whatsapp"></i> Soporte por WhatsApp</a></li>
+                                                <li><a href="{% url 'reportes:ayuda' %}" class="btn btn-primary mb-2"><i class="bi bi-question-circle"></i> Ver Centro de Ayuda</a></li>
+                                                <li><a href="#"><i class="bi bi-book"></i> Guía de usuario</a></li>
+                                                <li><a href="#"><i class="bi bi-question"></i> Preguntas frecuentes</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-primary shadow-sm animated fadeInRight">
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title"><i class="bi bi-lightbulb"></i> Consejos Rápidos</h5>
+                                            <ul class="list-unstyled">
+                                                <li><i class="bi bi-info-circle text-info"></i> Usa filtros para encontrar registros fácilmente.</li>
+                                                <li><i class="bi bi-info-circle text-info"></i> Revisa la sección de reportes para descargas avanzadas.</li>
+                                                <li><i class="bi bi-info-circle text-info"></i> Contacta soporte si tienes dudas técnicas.</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .animated {animation-duration: 0.8s; animation-fill-mode: both;}
+    .fadeIn {animation-name: fadeIn;}
+    .fadeInLeft {animation-name: fadeInLeft;}
+    .fadeInRight {animation-name: fadeInRight;}
+    @keyframes fadeIn {from {opacity: 0;} to {opacity: 1;}}
+    @keyframes fadeInLeft {from {opacity: 0; transform: translateX(-30px);} to {opacity: 1; transform: none;}}
+    @keyframes fadeInRight {from {opacity: 0; transform: translateX(30px);} to {opacity: 1; transform: none;}}
+</style>
+{% endblock %}

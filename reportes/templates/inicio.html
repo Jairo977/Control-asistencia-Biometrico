@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+{% block sidebar %}
+    {% include 'sidebar.html' %}
+{% endblock %}
+{% load static %}
+
+{% block title %}Inicio - Sistema Biométrico{% endblock %}
+
+{% block extra_css %}
+<style>
+    .feature-card {
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 15px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        border: none;
+        height: 100%;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+
+    .feature-icon {
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, var(--primary-color), var(--info-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hero-section {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 4rem 0;
+        margin-bottom: 3rem;
+        border-radius: 0 0 2rem 2rem;
+    }
+
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .stats-text {
+        color: var(--secondary-color);
+        font-size: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sidebar position-fixed top-0 start-0 h-100 px-0 py-0">
+    <div class="sidebar-logo">
+        <img src="{% static 'img/logo1.jpg' %}" alt="Logo">
+        <span class="sidebar-title">Biométrico</span>
+    </div>
+    <nav class="nav flex-column gap-1" style="font-family: 'Inter', 'Segoe UI', Arial, sans-serif;">
+        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">
+            <i class="bi bi-house"></i> Inicio
+        </a>
+        <a class="nav-link {% if 'registros' in request.path %}active{% endif %}" href="/registros/">
+            <i class="bi bi-journal-text"></i> Registros
+        </a>
+        <a class="nav-link {% if 'reportes' in request.path %}active{% endif %}" href="/reportes/">
+            <i class="bi bi-table"></i> Reportes
+        </a>
+        {% if request.user.is_superuser or request.user.is_staff %}
+        <a class="nav-link {% if 'configuracion' in request.path %}active{% endif %}" href="/configuracion/">
+            <i class="bi bi-gear"></i> Configuración
+        </a>
+        <a class="nav-link {% if 'dashboard_admin' in request.path %}active{% endif %}" href="/dashboard_admin/">
+            <i class="bi bi-person-gear"></i> Administración de Usuarios
+        </a>
+        {% endif %}
+        <a class="nav-link {% if 'ayuda' in request.path %}active{% endif %}" href="/ayuda/">
+            <i class="bi bi-question-circle"></i> Ayuda
+        </a>
+        <a class="nav-link" href="/logout/">
+            <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+        </a>
+    </nav>
+</div>
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Sistema de Control de Asistencia Biométrico</h1>
+                <p class="lead mb-4">Gestiona de manera eficiente la asistencia del personal mediante reconocimiento biométrico, generación de reportes avanzados y análisis en tiempo real.</p>
+                <a href="/dashboard" class="btn btn-light btn-lg px-4">Ir al Dashboard</a>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="bi bi-fingerprint display-1 opacity-75"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="container">
+    <!-- Características principales -->
+    <h2 class="text-center mb-5">Características Principales</h2>
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="feature-card p-4">
+                <i class="bi bi-clock-history feature-icon mb-3"></i>
+                <h3>Control en Tiempo Real</h3>
+                <p class="text-muted">Monitorea la asistencia del personal en tiempo real, con actualizaciones instantáneas y notificaciones automáticas.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card p-4">
+                <i class="bi bi-file-earmark-text feature-icon mb-3"></i>
+                <h3>Reportes Avanzados</h3>
+                <p class="text-muted">Genera informes detallados en PDF y Excel, con filtros personalizados y análisis estadístico.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="feature-card p-4">
+                <i class="bi bi-graph-up feature-icon mb-3"></i>
+                <h3>Análisis Estadístico</h3>
+                <p class="text-muted">Visualiza tendencias y patrones de asistencia con gráficos interactivos y métricas clave.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas del Sistema -->
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-4">Estadísticas del Sistema</h2>
+        </div>
+        <div class="col-md-3">
+            <div class="feature-card p-4 text-center">
+                <div class="stats-number">{{ total_usuarios }}</div>
+                <div class="stats-text">Usuarios Registrados</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="feature-card p-4 text-center">
+                <div class="stats-number">{{ registros_hoy }}</div>
+                <div class="stats-text">Registros Hoy</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="feature-card p-4 text-center">
+                <div class="stats-number">{{ departamentos }}</div>
+                <div class="stats-text">Departamentos</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="feature-card p-4 text-center">
+                <div class="stats-number">{{ ausentes_hoy }}</div>
+                <div class="stats-text">No han Marcado</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="feature-card p-4 text-center">
+                <div class="stats-number">{{ llegadas_tarde }}</div>
+                <div class="stats-text">Atrasados Hoy</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="feature-card p-4 text-center">
+                <div class="stats-number">{{ porcentaje_asistencia }}%</div>
+                <div class="stats-text">Asistencia (%)</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="feature-card p-4 text-center">
+                <div class="stats-number">{{ promedio_horas }}</div>
+                <div class="stats-text">Promedio Horas</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="feature-card p-4 text-center">
+                <div class="stats-number">99.9%</div>
+                <div class="stats-text">Uptime del Sistema</div>
+            </div>
+        </div>
+    </div>
+    
+
+    <!-- Sección de Ayuda Rápida -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="feature-card p-4">
+                <h2 class="mb-4">Ayuda Rápida</h2>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4><i class="bi bi-question-circle me-2"></i>¿Cómo generar reportes?</h4>
+                        <p>Accede a la sección de Reportes, selecciona el rango de fechas y el tipo de reporte que necesitas (PDF o Excel).</p>
+                        
+                        <h4><i class="bi bi-question-circle me-2"></i>¿Cómo ver registros específicos?</h4>
+                        <p>Utiliza los filtros en el Dashboard para buscar por ID, nombre o departamento.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h4><i class="bi bi-question-circle me-2"></i>¿Cómo exportar datos?</h4>
+                        <p>En la sección de Reportes, usa los botones de exportación para generar archivos en PDF o Excel.</p>
+                        
+                        <h4><i class="bi bi-question-circle me-2"></i>¿Necesitas más ayuda?</h4>
+                        <p>Contacta al equipo de soporte técnico para asistencia adicional.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Animación de números
+    document.addEventListener('DOMContentLoaded', function() {
+        const stats = document.querySelectorAll('.stats-number');
+        stats.forEach(stat => {
+            const target = parseFloat(stat.textContent);
+            let current = 0;
+            const increment = target / 50;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                stat.textContent = Number.isInteger(target) ? 
+                    Math.floor(current) : 
+                    current.toFixed(1);
+            }, 30);
+        });
+    });
+</script>
+{% endblock %}

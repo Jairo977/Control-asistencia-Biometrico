@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Eliminar Usuario{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow animated fadeIn">
+                <div class="card-body">
+                    <h1 class="display-5 mb-4 text-gradient"><i class="bi bi-trash me-2"></i>Eliminar Usuario</h1>
+                    <form method="post">
+                        {% csrf_token %}
+                        <p>¿Estás seguro que deseas eliminar al usuario <strong>{{ usuario.username }}</strong>?</p>
+                        <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> Eliminar</button>
+                        <a href="{% url 'reportes:usuarios_admin' %}" class="btn btn-secondary">Cancelar</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

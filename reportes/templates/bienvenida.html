@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Bienvenido al Sistema Biométrico{% endblock %}
+
+{% block sidebar %}
+    {% include 'sidebar.html' %}
+{% endblock %}
+{% block content %}
+<div class="bienvenida-bg position-relative">
+  <div class="bienvenida-card animated fadeIn text-center mx-auto">
+    <span class="bienvenida-icon">
+      <i class="bi bi-fingerprint"></i>
+    </span>
+    <h1 class="bienvenida-title">¡Bienvenido al Sistema Biométrico de Alausí!</h1>
+    <p class="bienvenida-desc">Gestiona la asistencia de toda la institucion de una manera <strong>moderna</strong>, <strong>segura</strong> y <strong>eficiente</strong>.</p>
+    <div class="row justify-content-center g-4 mt-4 mb-2">
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="card border-0 shadow animated fadeInLeft h-100">
+          <div class="card-body text-center">
+            <i class="bi bi-calendar-day display-4 text-primary mb-2"></i>
+            <h3 class="fw-bold mb-1">{{ fecha|default:"-" }}</h3>
+            <p class="mb-0 text-muted">Fecha actual</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="card border-0 shadow animated fadeIn h-100">
+          <div class="card-body text-center">
+            <i class="bi bi-person-check display-4 text-success mb-2"></i>
+            <h3 class="fw-bold mb-1">{{ registros_hoy|default:0 }}</h3>
+            <p class="mb-0 text-muted">Registros de hoy</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="card border-0 shadow animated fadeInRight h-100">
+          <div class="card-body text-center">
+            <i class="bi bi-clock-history display-4 text-danger mb-2"></i>
+            <h3 class="fw-bold mb-1">{{ total_atrasados|default:0 }}</h3>
+            <p class="mb-0 text-muted">Atrasos hoy</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="card border-0 shadow animated fadeInDown h-100">
+          <div class="card-body text-center">
+            <i class="bi bi-people display-4 text-info mb-2"></i>
+            <h3 class="fw-bold mb-1">{{ total_personal|default:0 }}</h3>
+            <p class="mb-0 text-muted">Personal total</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row justify-content-center g-4 mt-2 mb-2">
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card border-0 shadow animated fadeInUp h-100">
+          <div class="card-body text-center">
+            <i class="bi bi-person-x display-5 text-secondary mb-2"></i>
+            <h4 class="fw-bold mb-1">{{ no_han_marcado|default:0 }}</h4>
+            <p class="mb-0 text-muted">No han marcado hoy</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card border-0 shadow animated fadeInUp h-100">
+          <div class="card-body text-center">
+            <i class="bi bi-bar-chart-line display-5 text-warning mb-2"></i>
+            <h4 class="fw-bold mb-1">{{ porcentaje_asistencia|default:0 }}%</h4>
+            <p class="mb-0 text-muted">Porcentaje de asistencia</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card border-0 shadow animated fadeInUp h-100">
+          <div class="card-body text-center">
+            <i class="bi bi-clock display-5 text-primary mb-2"></i>
+            <h4 class="fw-bold mb-1">{{ promedio_horas|default:"0.0 hrs" }}</h4>
+            <p class="mb-0 text-muted">Promedio de horas trabajadas</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mt-4">
+      <span class="badge rounded-pill bg-primary fs-6 px-4 py-2">{{ titulo }}</span>
+      <p class="mt-2 text-muted">{{ descripcion }}</p>
+    </div>
+  </div>
+</div>
+<style>
+  .bienvenida-bg {
+    min-height: auto;
+    width: auto;
+    background: url('{% static "img/logo2.jpg" %}') center center/cover no-repeat;
+    position: relative;
+    overflow: hidden;
+  }
+  .bienvenida-card {
+    position: relative;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 2.5rem 2rem;
+    margin: 2.5rem auto;
+    max-width: 1200px;
+    width: 98vw;
+    text-align: center;
+  }
+  .bienvenida-icon {
+    display: inline-block;
+    font-size: 5rem;
+    color: #1e88e5;
+    margin-bottom: 0.5rem;
+  }
+  .bienvenida-title {
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+  .bienvenida-desc {
+    font-size: 1.2rem;
+    color: #555;
+    margin-bottom: 1.2rem;
+  }
+  .animated { animation-duration: 0.8s; animation-fill-mode: both; }
+  .fadeIn { animation-name: fadeIn; }
+  .fadeInLeft { animation-name: fadeInLeft; }
+  .fadeInRight { animation-name: fadeInRight; }
+  .fadeInDown { animation-name: fadeInDown; }
+  .fadeInUp { animation-name: fadeInUp; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes fadeInLeft { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: none; } }
+  @keyframes fadeInRight { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: none; } }
+  @keyframes fadeInDown { from { opacity: 0; transform: translateY(-40px); } to { opacity: 1; transform: none; } }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
+</style>
+{% endblock %}

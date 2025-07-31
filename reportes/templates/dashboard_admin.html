@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+{% block title %}Panel de Administración{% endblock %}
+{% block sidebar %}
+    {% include 'sidebar.html' %}
+{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+<div class="card shadow-lg border-0 animate__animated animate__fadeIn mb-4" style="background: linear-gradient(120deg, #f8fafc 80%, #e0e7ff 100%); box-shadow: 0 8px 32px rgba(60,60,120,0.12);">
+    <div class="card-body p-4">
+        <h1 class="display-5 mb-4 text-gradient" style="font-weight: 700; letter-spacing: 1px;"><i class="bi bi-person-gear me-2"></i>Administración de Usuarios</h1>
+        <p class="lead mb-3" style="color: #4b5563; font-size: 1.15rem;">Solo el superusuario puede crear, editar y eliminar usuarios del sistema.</p>
+        <hr class="mb-4" style="border-top: 2px solid #6366f1;">
+<div class="mb-4 p-4 bg-light rounded shadow-lg animate__animated animate__fadeInDown" style="border: 1.5px solid #e0e7ff;">
+    <h2 class="h5 mb-3 text-primary"><i class="bi bi-person-plus"></i> Crear Nuevo Usuario</h2>
+    <form method="post" class="mb-2" autocomplete="off" id="formCrearUsuario">
+        {% csrf_token %}
+        <div class="row g-3">
+            <div class="col-md-6 position-relative">
+                <label for="id_username" class="form-label">Nombre de usuario</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                    <input type="text" name="username" maxlength="150" class="form-control" id="id_username" placeholder="Ej: juanperez" required pattern="^[\w.@+-]+$" title="Solo letras, dígitos y @/./+/-/_" oninput="validarCampo(this)">
+                </div>
+                <div class="form-text text-muted">Requerido. Máx. 150 caracteres. Únicamente letras, dígitos y @/./+/-/_</div>
+            </div>
+            <div class="col-md-6 position-relative">
+                <label for="id_email" class="form-label">Correo electrónico</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                    <input type="email" name="email" class="form-control" id="id_email" placeholder="usuario@correo.com" required oninput="validarCampo(this)">
+                </div>
+            </div>
+            <div class="col-md-6 position-relative">
+                <label for="id_rol" class="form-label">Rol</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                    <select name="rol" class="form-select" id="id_rol" required>
+                        <option value="usuario">Usuario</option>
+                        <option value="staff">Staff</option>
+                        <option value="superuser">Superusuario</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6 position-relative">
+                <label for="id_password1" class="form-label">Contraseña</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                    <input type="password" name="password1" class="form-control" id="id_password1" placeholder="Mínimo 8 caracteres" required minlength="8" oninput="validarCampo(this)">
+                </div>
+                <div class="form-text text-muted">
+                    <ul class="mb-0 ps-3" style="font-size:0.95em;">
+                        <li>Debe contener al menos 8 caracteres.</li>
+                        <li>No puede ser completamente numérica.</li>
+                        <li>No puede ser una clave común.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6 position-relative">
+                <label for="id_password2" class="form-label">Confirmar contraseña</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                    <input type="password" name="password2" class="form-control" id="id_password2" placeholder="Repite la contraseña" required oninput="validarCampo(this)">
+                </div>
+                <div class="form-text text-muted">Para verificar, introduce la misma contraseña anterior.</div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-success w-100 mt-4 animate__animated animate__pulse animate__delay-1s" title="Guardar nuevo usuario"><i class="bi bi-save"></i> Crear Usuario</button>
+    </form>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} mt-2 animate__animated animate__fadeInUp">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    <script>
+    function validarCampo(input) {
+        if (input.checkValidity()) {
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+        } else {
+            input.classList.remove('is-valid');
+            input.classList.add('is-invalid');
+        }
+    }
+    document.getElementById('formCrearUsuario').addEventListener('submit', function(e) {
+        var pass1 = document.getElementById('id_password1').value;
+        var pass2 = document.getElementById('id_password2').value;
+        if (pass1 !== pass2) {
+            e.preventDefault();
+            document.getElementById('id_password2').classList.add('is-invalid');
+            alert('Las contraseñas no coinciden.');
+        }
+    });
+    </script>
+</div>
+<div class="mb-4 p-4 bg-white rounded shadow-lg animate__animated animate__fadeIn" style="border: 1.5px solid #e0e7ff;">
+    <h2 class="h5 mb-3 text-primary"><i class="bi bi-people"></i> Usuarios Registrados</h2>
+    <div class="mb-3">
+        <input type="text" class="form-control" id="buscadorUsuarios" placeholder="Buscar usuario..." onkeyup="filtrarUsuarios()">
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle" id="tablaUsuarios">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Usuario</th>
+                    <th>Email</th>
+                    <th>Rol</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for usuario in usuarios %}
+                <tr {% if usuario.username == request.user.username %}class="table-info"{% endif %}>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                        <i class="bi bi-person-circle me-1"></i>
+                        <span>{{ usuario.username }}</span>
+                        {% if usuario.username == request.user.username %}
+                            <span class="badge bg-primary ms-2">Tú</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ usuario.email }}</td>
+                    <td>
+                        {% if usuario.is_superuser %}
+                            <span class="badge bg-warning text-dark" title="Superusuario"><i class="bi bi-award"></i> Superusuario</span>
+                        {% elif usuario.is_staff %}
+                            <span class="badge bg-info text-dark" title="Staff"><i class="bi bi-person-badge"></i> Staff</span>
+                        {% else %}
+                            <span class="badge bg-secondary" title="Usuario"><i class="bi bi-person"></i> Usuario</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if request.user.is_superuser %}
+                            <a href="{% url 'reportes:usuario_editar' usuario.id %}" class="btn btn-warning btn-sm me-1" title="Editar usuario"><i class="bi bi-pencil"></i> Editar</a>
+                            <a href="{% url 'reportes:usuario_eliminar' usuario.id %}" class="btn btn-danger btn-sm" title="Eliminar usuario" onclick="return confirm('¿Seguro que deseas eliminar este usuario?');"><i class="bi bi-trash"></i> Eliminar</a>
+                        {% else %}
+                            <a href="#" class="btn btn-warning btn-sm me-1 disabled" title="Editar usuario"><i class="bi bi-pencil"></i> Editar</a>
+                            <a href="#" class="btn btn-danger btn-sm disabled" title="Eliminar usuario"><i class="bi bi-trash"></i> Eliminar</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center">No hay usuarios registrados.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+function filtrarUsuarios() {
+    var input = document.getElementById('buscadorUsuarios');
+    var filter = input.value.toLowerCase();
+    var table = document.getElementById('tablaUsuarios');
+    var trs = table.getElementsByTagName('tr');
+    for (var i = 1; i < trs.length; i++) {
+        var td = trs[i].getElementsByTagName('td')[1];
+        if (td) {
+            var txtValue = td.textContent || td.innerText;
+            trs[i].style.display = txtValue.toLowerCase().indexOf(filter) > -1 ? '' : 'none';
+        }
+    }
+}
+</script>
+<div class="mb-4 p-4 bg-light rounded shadow-lg animate__animated animate__fadeInUp" style="background: linear-gradient(90deg, #f8fafc 80%, #e0e7ff 100%); border: 1.5px solid #e0e7ff;">
+    <h2 class="h5 mb-3 text-primary"><i class="bi bi-pencil"></i> Edición de Usuario</h2>
+    <div class="text-muted">Selecciona un usuario para editar sus datos aquí.</div>
+    <!-- Aquí puedes agregar el formulario de edición dinámico en el futuro -->
+</div>
+<div class="alert alert-info mt-4 animate__animated animate__fadeIn">Esta sección solo es visible para el superusuario.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .table thead th { font-size: 1rem; }
+    .table td, .table th { vertical-align: middle; }
+    .badge { font-size: 0.95rem; padding: 0.4em 0.7em; box-shadow: 0 2px 8px rgba(60,60,120,0.08); }
+    .btn[title] { position: relative; }
+    .btn[title]:hover::after {
+        content: attr(title);
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        background: #6366f1;
+        color: #fff;
+        padding: 0.2em 0.6em;
+        border-radius: 4px;
+        font-size: 0.85em;
+        white-space: nowrap;
+        z-index: 10;
+        margin-left: 8px;
+        box-shadow: 0 2px 8px rgba(60,60,120,0.12);
+    }
+    .card { border-radius: 1.5rem !important; }
+    .rounded { border-radius: 1.2rem !important; }
+    .shadow-lg { box-shadow: 0 8px 32px rgba(60,60,120,0.12) !important; }
+    .bg-light { background: linear-gradient(120deg, #f8fafc 80%, #e0e7ff 100%) !important; }
+    .bg-white { background: linear-gradient(120deg, #fff 80%, #e0e7ff 100%) !important; }
+    .table-info { background: linear-gradient(90deg, #e0e7ff 60%, #f8fafc 100%) !important; }
+    .form-control:focus { border-color: #6366f1; box-shadow: 0 0 0 0.15rem #6366f1; }
+    .btn-success { background: linear-gradient(90deg, #059669 80%, #10b981 100%); border: none; }
+    .btn-success:hover { background: linear-gradient(90deg, #10b981 80%, #059669 100%); }
+    .btn-warning { background: linear-gradient(90deg, #fbbf24 80%, #f59e42 100%); border: none; color: #333; }
+    .btn-warning:hover { background: linear-gradient(90deg, #f59e42 80%, #fbbf24 100%); color: #222; }
+    .btn-danger { background: linear-gradient(90deg, #ef4444 80%, #f87171 100%); border: none; }
+    .btn-danger:hover { background: linear-gradient(90deg, #f87171 80%, #ef4444 100%); }
+    @media (max-width: 900px) {
+        .container, .row, .col-md-10 { padding: 0 !important; }
+        .table-responsive { font-size: 0.95em; }
+        .mb-4 { margin-bottom: 1rem !important; }
+        .card-body, .p-4 { padding: 1rem !important; }
+    }
+</style>
+{% endblock %}

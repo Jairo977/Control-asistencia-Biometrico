@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}Editar Usuario{% endblock %}
+{% block sidebar %}
+    {% include 'sidebar.html' %}
+{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow animated fadeIn">
+                <div class="card-body">
+                    <h1 class="display-5 mb-4 text-gradient"><i class="bi bi-pencil me-2"></i>Editar Usuario</h1>
+                    <form method="post" autocomplete="off" id="formEditarUsuario">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-6 position-relative">
+                                <label for="id_username" class="form-label">Nombre de usuario</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                    <input type="text" name="username" maxlength="150" class="form-control" id="id_username" value="{{ usuario.username }}" required pattern="^[\w.@+-]+$" title="Solo letras, dígitos y @/./+/-/_">
+                                </div>
+                                <div class="form-text text-muted">Requerido. Máx. 150 caracteres. Únicamente letras, dígitos y @/./+/-/_</div>
+                            </div>
+                            <div class="col-md-6 position-relative">
+                                <label for="id_email" class="form-label">Correo electrónico</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                    <input type="email" name="email" class="form-control" id="id_email" value="{{ usuario.email }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6 position-relative">
+                                <label for="id_rol" class="form-label">Rol</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                                    <select name="rol" class="form-select" id="id_rol" required>
+                                        <option value="usuario" {% if not usuario.is_staff and not usuario.is_superuser %}selected{% endif %}>Usuario</option>
+                                        <option value="staff" {% if usuario.is_staff and not usuario.is_superuser %}selected{% endif %}>Staff</option>
+                                        <option value="superuser" {% if usuario.is_superuser %}selected{% endif %}>Superusuario</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6 position-relative">
+                                <label for="id_password1" class="form-label">Contraseña nueva</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                    <input type="password" name="password1" class="form-control" id="id_password1" placeholder="Mínimo 8 caracteres" minlength="8">
+                                </div>
+                                <div class="form-text text-muted">
+                                    <ul class="mb-0 ps-3" style="font-size:0.95em;">
+                                        <li>Debe contener al menos 8 caracteres.</li>
+                                        <li>No puede ser completamente numérica.</li>
+                                        <li>No puede ser una clave común.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-6 position-relative">
+                                <label for="id_password2" class="form-label">Confirmar contraseña nueva</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                                    <input type="password" name="password2" class="form-control" id="id_password2" placeholder="Repite la contraseña">
+                                </div>
+                                <div class="form-text text-muted">Para verificar, introduce la misma contraseña anterior.</div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-warning w-100 mt-4 animate__animated animate__pulse animate__delay-1s" title="Guardar Cambios"><i class="bi bi-save"></i> Guardar Cambios</button>
+                        <a href="{% url 'reportes:usuarios_admin' %}" class="btn btn-secondary mt-2">Cancelar</a>
+                    </form>
+                    <script>
+                    document.getElementById('formEditarUsuario').addEventListener('submit', function(e) {
+                        var pass1 = document.getElementById('id_password1').value;
+                        var pass2 = document.getElementById('id_password2').value;
+                        if (pass1 || pass2) {
+                            if (pass1 !== pass2) {
+                                e.preventDefault();
+                                document.getElementById('id_password2').classList.add('is-invalid');
+                                alert('Las contraseñas no coinciden.');
+                            }
+                        }
+                    });
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

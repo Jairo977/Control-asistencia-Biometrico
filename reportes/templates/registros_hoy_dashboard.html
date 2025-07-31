@@ -1,0 +1,105 @@
+puedes agregar un nuevo template para incorporar este codigo
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Registros de Hoy{% endblock %}
+{% block sidebar %}
+    {% include 'sidebar.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="bienvenida-bg position-fixed w-100 h-100" style="top:0;left:0;z-index:-1;"></div>
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-primary shadow-sm animated fadeInLeft">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-day display-4 text-primary mb-2"></i>
+                    <h3>{{ fecha }}</h3>
+                    <p class="mb-0 text-muted">Fecha actual</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-success shadow-sm animated fadeIn">
+                <div class="card-body text-center">
+                    <i class="bi bi-person-check display-4 text-success mb-2"></i>
+                    <h3>{{ registros|length }}</h3>
+                    <p class="mb-0 text-muted">Registros de hoy</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-danger shadow-sm animated fadeInRight">
+                <div class="card-body text-center">
+                    <i class="bi bi-clock-history display-4 text-danger mb-2"></i>
+                    <h3>{{ total_atrasados }}</h3>
+                    <p class="mb-0 text-muted">Atrasos hoy</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-warning shadow-sm animated fadeInUp">
+                <div class="card-body text-center">
+                    <i class="bi bi-person-x display-4 text-warning mb-2"></i>
+                    <h3>{{ no_han_marcado }}</h3>
+                    <p class="mb-0 text-muted">No han marcado</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card shadow animated fadeIn">
+        <div class="card-body">
+            <h1 class="mb-4 text-gradient"><i class="bi bi-table"></i> {{ titulo }}</h1>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th><i class="bi bi-person-badge"></i> ID Usuario</th>
+                            <th><i class="bi bi-person"></i> Nombre</th>
+                            <th><i class="bi bi-building"></i> Departamento</th>
+                            <th><i class="bi bi-calendar3"></i> Fecha última marcación</th>
+                            <th><i class="bi bi-clock"></i> Hora última marcación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usuario in usuarios %}
+                        <tr>
+                            <td>{{ usuario.item }}</td>
+                            <td>{{ usuario.id_usuario }}</td>
+                            <td>{{ usuario.nombre }}</td>
+                            <td>{{ usuario.departamento }}</td>
+                            <td>{% if usuario.ultima_marcacion %}{{ usuario.ultima_marcacion.fecha }}{% else %}None{% endif %}</td>
+                            <td>{% if usuario.ultima_marcacion %}{{ usuario.ultima_marcacion.hora }}{% else %}None{% endif %}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No hay usuarios registrados.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .bienvenida-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: url('{% static "img/logo2.jpg" %}') center center/cover no-repeat;
+        z-index: -1;
+        opacity: 1;
+    }
+    .animated {animation-duration: 0.8s; animation-fill-mode: both;}
+    .fadeIn {animation-name: fadeIn;}
+    .fadeInLeft {animation-name: fadeInLeft;}
+    .fadeInRight {animation-name: fadeInRight;}
+    @keyframes fadeIn {from {opacity: 0;} to {opacity: 1;}}
+    @keyframes fadeInLeft {from {opacity: 0; transform: translateX(-30px);} to {opacity: 1; transform: none;}}
+    @keyframes fadeInRight {from {opacity: 0; transform: translateX(30px);} to {opacity: 1; transform: none;}}
+</style>
+{% endblock %}r

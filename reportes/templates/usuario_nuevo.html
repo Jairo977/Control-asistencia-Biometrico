@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Nuevo Usuario{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow animated fadeIn">
+                <div class="card-body">
+                    <h1 class="display-5 mb-4 text-gradient"><i class="bi bi-person-plus me-2"></i>Nuevo Usuario</h1>
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Crear Usuario</button>
+                        <a href="{% url 'reportes:usuarios_admin' %}" class="btn btn-secondary">Cancelar</a>
+                    </form>
+                    <hr>
+                    <h2 class="h5 mt-4 mb-3"><i class="bi bi-people"></i> Usuarios Registrados</h2>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Email</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for usuario in usuarios %}
+                            <tr>
+                                <td>{{ usuario.username }}</td>
+                                <td>{{ usuario.email }}</td>
+                                <td>
+                                    <a href="{% url 'reportes:usuario_editar' usuario.id %}" class="btn btn-warning btn-sm"><i class="bi bi-pencil"></i> Editar</a>
+                                    <a href="{% url 'reportes:usuario_eliminar' usuario.id %}" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Eliminar</a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="3">No hay usuarios registrados.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
