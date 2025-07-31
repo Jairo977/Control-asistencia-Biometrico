@@ -45,6 +45,8 @@ staticfiles/
 .env.development
 .env.production
 .env.waitress
+# Archivo de ejemplo de entorno (no subir .env real, solo .env.example)
+.env.example
 
 # IDEs
 .vscode/
