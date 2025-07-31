@@ -98,9 +98,8 @@ Control-asistencia-Biometrico/
 
 ## 👨‍💻 Créditos y contacto
 
-- Autor: Jairo977
-- Email: tu.email@ejemplo.com
-- Portafolio: https://github.com/Jairo977
+- Autor: Jairo Ruiz
+- Email: jwruiz@espe.edu.ec
 
 ---
 
