@@ -35,14 +35,17 @@ Consulta la documentación técnica en la carpeta [`docs/`](docs/).
 	```bash
 	pip install -r requirements.txt
 	```
-3. Configura la conexión a SQL Server en `reportes/db_utils.py`:
-	```python
-	DB_SERVER = 'TU_SERVIDOR_SQL'  # Ejemplo: '192.168.0.9\\ATIEMPO'
-	DB_NAME = 'UTIME'
-	DB_USER = 'tics2025'
-	DB_PASSWORD = 'tics2025'
-	```
-	Asegúrate de tener instalado el driver ODBC 17 para SQL Server.
+3. Configura la conexión a SQL Server usando variables de entorno (recomendado):
+	 - Crea un archivo `.env` (no lo subas al repositorio) y define:
+		 ```env
+		 DB_SERVER=TU_SERVIDOR_SQL
+		 DB_NAME=UTIME
+		 DB_USER=usuario
+		 DB_PASSWORD=contraseña
+		 ```
+	 - Modifica `reportes/db_utils.py` para leer estas variables con `os.environ`.
+	 - Nunca subas credenciales reales al repositorio.
+	 - Asegúrate de tener instalado el driver ODBC 17 para SQL Server.
 4. Ejecuta el servidor:
 	```bash
 	python manage.py runserver
